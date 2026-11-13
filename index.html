@@ -34,10 +34,9 @@ button:active{transform:scale(.98)}
     <div class="heart">❤️</div>
     <h1>حبيت قلك بس قدي بحبك وبعشقك ❤️</h1>
     <p class="center">بس قبل كل شي، لازم تعترفي بحبك إلي وتقوليلي بحبك أول شي 😌</p>
-    <form id="form1">
-      <input id="pass1" placeholder="قوليلي الكلمة الحلوة..." autocomplete="off">
-      <button type="submit">بحبك ❤️</button>
-    </form>
+    <input id="pass1" placeholder="قوليلي الكلمة الحلوة..." autocomplete="off"
+      onkeydown="if(event.key==='Enter'){event.preventDefault();checkPassword('pass1','بحبك','s2','e1','يا قلبي، شكل الكلمة خانتك هالمرة 😘 جرّبي كمان مرة، أنا ناطر كلمة «بحبك» منك ❤️')}">
+    <button type="button" onclick="checkPassword('pass1','بحبك','s2','e1','يا قلبي، شكل الكلمة خانتك هالمرة 😘 جرّبي كمان مرة، أنا ناطر كلمة «بحبك» منك ❤️')">بحبك ❤️</button>
     <div id="e1" class="error"></div>
   </section>
 
@@ -57,10 +56,9 @@ button:active{transform:scale(.98)}
       <button class="heartkey" onclick="reveal(this,'ف')">❤️<small>اضغطي</small></button>
       <button class="heartkey" onclick="reveal(this,'ة')">❤️<small>اضغطي</small></button>
     </div>
-    <form id="form2">
-      <input id="pass2" placeholder="اكتبي كلمة السر" autocomplete="off">
-      <button type="submit">افتحي المفاجأة</button>
-    </form>
+    <input id="pass2" placeholder="اكتبي كلمة السر" autocomplete="off"
+      onkeydown="if(event.key==='Enter'){event.preventDefault();checkPassword('pass2','اسفة','s4','e2','يا عيوني، مو هي الكلمة اللي عم دور عليها 🥰 شوفي القلوب منيح وجربي مرة تانية، وأنا معك ❤️')}">
+    <button type="button" onclick="checkPassword('pass2','اسفة','s4','e2','يا عيوني، مو هي الكلمة اللي عم دور عليها 🥰 شوفي القلوب منيح وجربي مرة تانية، وأنا معك ❤️')">افتحي المفاجأة</button>
     <div id="e2" class="error"></div>
   </section>
 
@@ -73,11 +71,12 @@ button:active{transform:scale(.98)}
 
   <section class="screen" id="s5">
     <h1>آخر كلمة سر، ووعد ما عاد في مقالب 😂</h1>
-    <p class="center">حطي كلمة السر يا أميرة… وإذا نسيتيها رح نضطر نعيد من الأول 😜❤️</p>
-    <form id="form3">
-      <input id="pass3" placeholder="كلمة السر هون..." autocomplete="off">
-      <button type="submit">يلا افتحي الرسالة</button>
-    </form>
+    <p class="center">ماتستعجلي يا أميرتي… رح ساعدك بحل اللغز، حرف حرف، وما رح خليكي تحتاري ❤️</p>
+    <p class="center">اكتبي كلمة السر، وكل حرف رح قلك إذا إنتِ ماشية صح 😘</p>
+    <input id="pass3" placeholder="اكتبي كلمة السر هون..." autocomplete="off"
+      oninput="checkLetterByLetter()"
+      onkeydown="if(event.key==='Enter'){event.preventDefault();checkLetterByLetter();}">
+    <div id="letterHint" class="center" aria-live="polite" style="min-height:72px;padding:12px 4px;font-size:17px;line-height:1.9;color:#b8325c"></div>
     <div id="e3" class="error"></div>
   </section>
 
@@ -119,33 +118,73 @@ button:active{transform:scale(.98)}
 </main>
 <script>
 function go(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(function(screen){screen.classList.remove('active');});
   document.getElementById(id).classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo(0,0);
 }
 function normalize(value){
-  return value.trim().replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ـ/g,'').replace(/\\s+/g,' ');
+  return value.trim().replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ـ/g,'').replace(/\s+/g,' ');
+}
+function checkPassword(inputId,expected,nextId,errorId,errorText){
+  var input=document.getElementById(inputId);
+  var typed=normalize(input.value);
+  if(typed===normalize(expected)){
+    document.getElementById(errorId).textContent='';
+    go(nextId);
+  }else{
+    document.getElementById(errorId).textContent=errorText;
+  }
+}
+var lastCheckedLength = 0;
+var passwordCompleted = false;
+function checkLetterByLetter(){
+  if(passwordCompleted) return;
+  var input=document.getElementById('pass3');
+  var hint=document.getElementById('letterHint');
+  var typed=normalize(input.value);
+  var expected='بحبك كتير';
+
+  if(typed.length===0){
+    lastCheckedLength=0;
+    hint.textContent='على مهلك يا قلبي… أنا معك خطوة بخطوة ❤️';
+    return;
+  }
+
+  if(expected.indexOf(typed)===0){
+    lastCheckedLength=typed.length;
+    if(typed===expected){
+      passwordCompleted=true;
+      input.disabled=true;
+      hint.textContent='يا روحي! حلّيتي اللغز وقلبي صار يرقص من الفرحة 🥹❤️ بحبك قد هالدنيا وأكتر… استعدّي لرسالتي إلك!';
+      window.setTimeout(function(){go('s6');},2600);
+    }else{
+      var sweetMessages=[
+        'برافو يا عيوني، أول حرف صح… كمّلي ❤️',
+        'صح يا حلوة! شايفة قدي شاطرة؟ 😍',
+        'ممتاز يا روحي، كل حرف عم يقرّبك من المفاجأة 💗',
+        'إي هيك! عم تمشي صح يا أميرتي، لا توقفي 😘',
+        'صح صح! قلبي عم يقول إنك قربتي كتير 🥰',
+        'يا سلام عليكي! ضلّ شوي وبتوصلي ❤️',
+        'كلها صح يا عمري… كمّلي وأنا ناطر فرحتك 💋',
+        'يا قلبي، وصلتي تقريباً! ضلّ آخر لمسة ❤️',
+        'يا روحي! الكلمة كلها صح… بحبك كتير! ❤️'
+      ];
+      hint.textContent=sweetMessages[Math.min(typed.length-1,sweetMessages.length-1)];
+    }
+  }else{
+    var correctPrefix=0;
+    while(correctPrefix<typed.length && correctPrefix<expected.length && typed[correctPrefix]===expected[correctPrefix]){
+      correctPrefix++;
+    }
+    lastCheckedLength=typed.length;
+    hint.textContent='يا حبيبتي، هالحرف مو بمكانه… ولا يهمك، إنتِ قدّها ❤️ جرّبي صححيه، وأنا رح ساعدك لحتى نحل اللغز سوا 😘';
+  }
 }
 function reveal(btn,letter){
   btn.textContent=letter;
   btn.classList.add('revealed');
   btn.disabled=true;
 }
-function bindPassword(formId,inputId,expected,nextId,errorId,errorText){
-  document.getElementById(formId).addEventListener('submit',function(event){
-    event.preventDefault();
-    const typed=normalize(document.getElementById(inputId).value);
-    if(typed===normalize(expected)){
-      document.getElementById(errorId).textContent='';
-      go(nextId);
-    }else{
-      document.getElementById(errorId).textContent=errorText;
-    }
-  });
-}
-bindPassword('form1','pass1','بحبك','s2','e1','يا قلبي، شكل الكلمة خانتك هالمرة 😘 جرّبي كمان مرة، أنا ناطر كلمة «بحبك» منك ❤️');
-bindPassword('form2','pass2','اسفة','s4','e2','يا عيوني، مو هي الكلمة اللي عم دور عليها 🥰 شوفي القلوب منيح وجربي مرة تانية، وأنا معك ❤️');
-bindPassword('form3','pass3','بحبك كتير','s6','e3','يا روحي، الجواب مو مضبوط… بس ولا يهمك، المحاولة الحلوة منك بتكفيني 😍 جرّبي تاني واكتبي «بحبك كتير» ❤️');
 </script>
 </body>
 </html>
